@@ -1,0 +1,15 @@
+{
+  "name": "min-base64",
+  "version": "1.0.1",
+  "description": "simple base64 of pure javascript, btoa and atob support unicode",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "getbytes": "^1.0.1",
+    "min-util": "latest"
+  }
+}
