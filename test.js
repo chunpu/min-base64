@@ -19,3 +19,9 @@ describe('btoa', function() {
 		assert.deepEqual(base64.btoa('中文12'), '5Lit5paHMTI=')
 	})
 })
+
+describe('atob', function() {
+	it('decode other unicode', function() {
+		assert.deepEqual(base64.atob('5Lit5paHMTI='), '中文12')
+	})
+})

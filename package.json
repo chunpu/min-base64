@@ -6,9 +6,10 @@
   "scripts": {
     "test": "mocha test"
   },
-  "author": "",
+  "author": "chunpu",
   "license": "ISC",
   "dependencies": {
+    "bytecode": "^1.0.1",
     "getbytes": "^1.0.1",
     "min-util": "latest"
   }
