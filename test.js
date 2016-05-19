@@ -14,6 +14,11 @@ describe('btoa encode', function() {
 		assert.deepEqual(base64.btoa('abc'), 'YWJj')
 	})
 
+	it('encode binary array', function() {
+		// abc => [97, 98, 99]
+		assert.deepEqual(base64.btoa([97, 98, 99]), 'YWJj')
+	})
+
 	it('encode other unicode', function() {
 		// echo -n 中文12 | base64
 		assert.deepEqual(base64.btoa('中文12'), '5Lit5paHMTI=')

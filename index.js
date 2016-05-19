@@ -73,6 +73,7 @@ function arr8to6(arr) {
 function arr6to8(arr) {
 	// 3 => 4
 	var ret = []
+
 	if (arr[3]) {
 		ret[2] = ((arr[2] & 0x03) << 6) + arr[3]
 	}
@@ -82,5 +83,6 @@ function arr6to8(arr) {
 	if (arr[1]) {
 		ret[0] = (arr[0] << 2) + ((arr[1] & 0x30) >> 4)
 	}
+
 	return ret
 }
