@@ -1,101 +1,86 @@
 var _ = require('min-util')
 var byteCode = require('bytecode')
 
+var is = _.is
+var tableStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+var table = str2obj(tableStr)
+var padChar = '='
+var invertTable = _.invert(table)
+
 exports.encode = exports.btoa = encode
 exports.decode = exports.atob = decode
 
-// btoa: b means binary, a means ascii
-// btoa mdn https://html.spec.whatwg.org/multipage/#dom-windowbase64-btoa
-
-var bit2char = getTable() // 000000 => 65('A')
-var char2bit = _.mapObject(_.invert(bit2char), function(val) {
-	return ~~val
-}) // 65('A') => 000000
-// http://www.cnblogs.com/chengxiaohui/articles/3951129.html
-
-function encode(data) {
-	// binary => ascii
-	// https://tools.ietf.org/html/rfc4648
-	var binary = byteCode.decode(data)
-	var binary = _.map(binary, function(ch, i) {
-		var ret = ch.toString(2)
-		return _.padLeft(ret, 8, 0)
-	})
-	// binary.push('00000')
-	binary = binary.join('')
-	console.log(binary.length)
-	var ascii = []
-	var i = 0
-
-	while (i < binary.length - 5) {
-		ascii.push(binary.slice(i, i + 6))
-		i += 6
+function str2obj(str) {
+	var ret = {}
+	for (var i = 0; i < str.length; i++) {
+		ret[i] = str.charAt(i)
 	}
-
-	ascii = _.map(ascii, function(item) {
-		 var code = parseInt(item, 2) // 0 ~ 63
-		 return String.fromCharCode(bit2char[code])
-	}).join('')
-
-	var len = ascii.length
-	var remainder = len % 4
-	if (remainder) {
-		len = len + 4 - remainder
-	}
-
-	return _.padRight(ascii, len, '=')
+	return ret
 }
 
-console.log(encode('23'))
-
-function decode(data) {
-	// https://html.spec.whatwg.org/multipage/webappapis.html#dom-windowbase64-atob
-	// 8.2
-	// 3 remove all space char
-	data = _.tostr(data).replace(/\s+/g, '').replace(/=+$/, '')
-	var bytes = byteCode.decode(data)
-	var ascii = _.map(bytes, function(ch) {
-		var bit = char2bit[ch]
-		if (null == bit) {
-			throw new Error('out range')
-		}
-		return _.padLeft(bit.toString(2), 6, 0)
-	})
-	ascii.push('0000000')
-	ascii = ascii.join('')
-	var binary = []
-	var i = 0
-
-	while (i < ascii.length - 7) {
-		binary.push(ascii.slice(i, i + 8))
-		i += 8
+function encode(binary) {
+	if (is.string(binary)) {
+		binary = byteCode.decode(binary)
 	}
-
-	binary = binary.map(function(ch) {
-		return parseInt(ch, 2)
-	})
-	return byteCode.encode(binary)
+	return encodeBinary(binary)
 }
 
-/*
-//console.log(decode('YQ=='))
-var str = encode('中文12')
-*/
-
-function getTable() {
-	// A~Za~z0~9+/
-	var bytes = byteCode.decode('Aa0+/')
-	var upper = _.range(26).map(function(i) {
-		return bytes[0] + i
+function decode(text) {
+	text = text.replace(/\s+$/, '').replace(/=+$/, '')
+	var buf = _.map(text.split(''), function(char) {
+		return ~~invertTable[char]
 	})
+	var arr = []
+	for (var i = 0; i < buf.length; i += 4) {
+		arr.push.apply(arr, arr6to8(_.slice(buf, i, i + 4)))
+	}
+	return byteCode.encode(arr)
+}
 
-	var lower = upper.map(function(code) {
-		return code + bytes[1] - bytes[0]
+function encodeBinary(binary) {
+	var arr = []
+	for (var i = 0; i < binary.length; i += 3) {
+		arr.push.apply(arr, arr8to6(_.slice(binary, i, i + 3)))
+	}
+	arr = _.map(arr, function(i) {
+		return table[i] || padChar
 	})
+	return arr.join('')
+}
 
-	var num = _.range(10).map(function(i) {
-		return bytes[2] + i
-	})
-	
-	return upper.concat(lower, num, bytes[3], bytes[4], '=')
+function arr8to6(arr) {
+	// 4 => 3
+	// 从3到0，因为3可能有变化
+	var ret = []
+
+	if (null == arr[2]) {
+		ret[3] = 64
+	} else {
+		ret[3] = arr[2] & 0x3f
+	}
+
+	if (null == arr[1]) {
+		ret[2] = 64
+	} else {
+		ret[2] = ((arr[1] & 0x0f) << 2) | (arr[2] >> 6)
+	}
+
+	ret[1] = ((arr[0] & 0x03) << 4) | (arr[1] >> 4)
+	ret[0] = arr[0] >> 2 // 肯定有 arr[0]
+	return ret
+}
+
+function arr6to8(arr) {
+	// 3 => 4
+	var ret = []
+	if (arr[3]) {
+		ret[2] = ((arr[2] & 0x03) << 6) + arr[3]
+	}
+	if (arr[2]) {
+		ret[1] = ((arr[1] & 0x0f) << 4) + ((arr[2] & 0x3c) >> 2)
+	}
+	if (arr[1]) {
+		ret[0] = (arr[0] << 2) + ((arr[1] & 0x30) >> 4)
+	}
+	return ret
 }

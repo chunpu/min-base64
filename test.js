@@ -1,7 +1,7 @@
 var assert = require('assert')
 var base64 = require('./')
 
-describe('btoa', function() {
+describe('btoa encode', function() {
 	it('encode empty', function() {
 		assert.deepEqual(base64.btoa(''), '')
 	})
@@ -20,8 +20,12 @@ describe('btoa', function() {
 	})
 })
 
-describe('atob', function() {
+describe('atob decode', function() {
 	it('decode other unicode', function() {
 		assert.deepEqual(base64.atob('5Lit5paHMTI='), '中文12')
+	})
+
+	it('decode other unicode', function() {
+		assert.deepEqual(base64.atob('5Lit5paHMTI==== '), '中文12')
 	})
 })
