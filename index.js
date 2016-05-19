@@ -77,12 +77,10 @@ function decode(data) {
 	return byteCode.encode(binary)
 }
 
-
 /*
 //console.log(decode('YQ=='))
 var str = encode('中文12')
 */
-//console.log(decode(str) + 'xx')
 
 function getTable() {
 	// A~Za~z0~9+/
