@@ -32,7 +32,8 @@ function decode(text) {
 	})
 	var arr = []
 	for (var i = 0; i < buf.length; i += 4) {
-		arr.push.apply(arr, arr6to8(_.slice(buf, i, i + 4)))
+		var bytes = arr6to8(_.slice(buf, i, i + 4))
+		arr.push.apply(arr, bytes)
 	}
 	return byteCode.encode(arr)
 }
@@ -74,13 +75,13 @@ function arr6to8(arr) {
 	// 3 => 4
 	var ret = []
 
-	if (arr[3]) {
+	if (null != arr[3]) {
 		ret[2] = ((arr[2] & 0x03) << 6) + arr[3]
 	}
-	if (arr[2]) {
+	if (null != arr[2]) {
 		ret[1] = ((arr[1] & 0x0f) << 4) + ((arr[2] & 0x3c) >> 2)
 	}
-	if (arr[1]) {
+	if (null != arr[1]) {
 		ret[0] = (arr[0] << 2) + ((arr[1] & 0x30) >> 4)
 	}
 

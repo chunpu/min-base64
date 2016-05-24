@@ -34,3 +34,10 @@ describe('atob decode', function() {
 		assert.deepEqual(base64.atob('5Lit5paHMTI==== '), '中文12')
 	})
 })
+
+describe('other', function() {
+	var txt = '内地,游戏,真人秀,地区,类型,配音语种,国语,综艺娱乐,综艺娱乐,最新更新,跑男团湿身激战西双版纳'
+	var a = base64.btoa(txt)
+	var b = base64.atob(a)
+	assert.deepEqual(b, txt)
+})

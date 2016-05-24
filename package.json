@@ -1,6 +1,6 @@
 {
   "name": "min-base64",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "simple base64 of pure javascript, btoa and atob support unicode, support node and all browsers even IE6",
   "main": "index.js",
   "scripts": {
