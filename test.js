@@ -36,8 +36,21 @@ describe('atob decode', function() {
 })
 
 describe('other', function() {
-	var txt = '内地,游戏,真人秀,地区,类型,配音语种,国语,综艺娱乐,综艺娱乐,最新更新,跑男团湿身激战西双版纳'
-	var a = base64.btoa(txt)
-	var b = base64.atob(a)
-	assert.deepEqual(b, txt)
+	it('support long str', function() {
+		var txt = '内地,游戏,真人秀,地区,类型,配音语种,国语,综艺娱乐,综艺娱乐,最新更新,跑男团湿身激战西双版纳'
+		var expectedB64 = '5YaF5ZywLOa4uOaIjyznnJ/kurrnp4As5Zyw5Yy6LOexu+WeiyzphY3pn7Por63np40s5Zu96K+tLOe7vOiJuuWoseS5kCznu7zoibrlqLHkuZAs5pyA5paw5pu05pawLOi3keeUt+Wboua5v+i6q+a/gOaImOilv+WPjOeJiOe6sw=='
+		var b64 = base64.btoa(txt)
+		assert.deepEqual(b64, expectedB64)
+		var retTxt = base64.atob(b64)
+		assert.deepEqual(retTxt, txt)
+
+		var URLB64 = b64.replace(/\+/g, '-').replace(/\//g, '_')
+		assert.deepEqual(URLB64, '5YaF5ZywLOa4uOaIjyznnJ_kurrnp4As5Zyw5Yy6LOexu-WeiyzphY3pn7Por63np40s5Zu96K-tLOe7vOiJuuWoseS5kCznu7zoibrlqLHkuZAs5pyA5paw5pu05pawLOi3keeUt-Wboua5v-i6q-a_gOaImOilv-WPjOeJiOe6sw==')
+		var retURLTxt = base64.atob(URLB64, {useURL: true})
+		assert.deepEqual(retURLTxt, txt)
+	})
+
+	it('support skip empty line \\n \\r', function() {
+		assert.deepEqual(base64.atob('5Lit\n5p\n\raH\rMTI='), '中文12')
+	})
 })

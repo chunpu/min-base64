@@ -2,55 +2,62 @@ var _ = require('min-util')
 var byteCode = require('bytecode')
 
 var is = _.is
-var tableStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-var table = str2obj(tableStr)
-var padChar = '='
-var invertTable = _.invert(table)
 
 exports.encode = exports.btoa = encode
 exports.decode = exports.atob = decode
 
-function str2obj(str) {
-	var ret = {}
-	for (var i = 0; i < str.length; i++) {
-		ret[i] = str.charAt(i)
-	}
-	return ret
-}
+var padChar = '='
+var StdEncoding = getEncodingMap('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/')
+var URLEncoding = getEncodingMap('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_')
 
-function encode(binary) {
-	if (is.string(binary)) {
-		binary = byteCode.decode(binary)
+function decode(text, opt) {
+	opt = opt || {}
+	var encoding = StdEncoding
+	if (opt.useURL) {
+		encoding = URLEncoding
+	} else if (null == opt.useURL && isURLBase64(text)) {
+		encoding = URLEncoding
 	}
-	return encodeBinary(binary)
-}
-
-function decode(text) {
-	text = text.replace(/\s+$/, '').replace(/=+$/, '')
+	text = text
+		.replace(/\s+$/, '')
+		.replace(/=+$/, '')
+		.replace(/[\n\r]/g, '') // skip empty line
 	var buf = _.map(text.split(''), function(char) {
-		return ~~invertTable[char]
+		return ~~encoding.decodeMap[char]
 	})
 	var arr = []
 	for (var i = 0; i < buf.length; i += 4) {
-		var bytes = arr6to8(_.slice(buf, i, i + 4))
+		var bytes = arr3to4(_.slice(buf, i, i + 4))
 		arr.push.apply(arr, bytes)
 	}
 	return byteCode.encode(arr)
 }
 
-function encodeBinary(binary) {
+function encode(binary, opt) {
+	if (is.string(binary)) {
+		binary = byteCode.decode(binary)
+	}
+	return encodeBinary(binary, opt)
+}
+
+function encodeBinary(binary, opt) {
+	opt = opt || {}
+	var encoding = StdEncoding
+	if (opt.useURL) {
+		encoding = URLEncoding
+	}
 	var arr = []
 	for (var i = 0; i < binary.length; i += 3) {
-		arr.push.apply(arr, arr8to6(_.slice(binary, i, i + 3)))
+		arr.push.apply(arr, arr4to3(_.slice(binary, i, i + 3)))
 	}
 	arr = _.map(arr, function(i) {
-		return table[i] || padChar
+		return encoding.encodeMap[i] || padChar
 	})
 	return arr.join('')
 }
 
-function arr8to6(arr) {
-	// 4 => 3
+function arr4to3(arr) {
+	// 4 * 6 => 3 * 8
 	// 从3到0，因为3可能有变化
 	var ret = []
 
@@ -71,8 +78,8 @@ function arr8to6(arr) {
 	return ret
 }
 
-function arr6to8(arr) {
-	// 3 => 4
+function arr3to4(arr) {
+	// 3 * 8 => 4 * 6
 	var ret = []
 
 	if (null != arr[3]) {
@@ -86,4 +93,25 @@ function arr6to8(arr) {
 	}
 
 	return ret
+}
+
+function getEncodingMap(str) {
+	var encodeMap = str2obj(str)
+	var decodeMap = _.invert(encodeMap)
+	return {
+		encodeMap: encodeMap,
+		decodeMap: decodeMap
+	}
+}
+
+function str2obj(str) {
+	var ret = {}
+	for (var i = 0; i < str.length; i++) {
+		ret[i] = str.charAt(i)
+	}
+	return ret
+}
+
+function isURLBase64(text) {
+	return /[-_]/.test(text)
 }
