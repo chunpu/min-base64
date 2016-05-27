@@ -6,9 +6,8 @@ var is = _.is
 exports.encode = exports.btoa = encode
 exports.decode = exports.atob = decode
 
-var padChar = '='
-var StdEncoding = getEncodingMap('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/')
-var URLEncoding = getEncodingMap('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_')
+var StdEncoding = getEncodingMap('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/', '=')
+var URLEncoding = getEncodingMap('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_', '')
 
 function decode(text, opt) {
 	opt = opt || {}
@@ -51,7 +50,7 @@ function encodeBinary(binary, opt) {
 		arr.push.apply(arr, arr4to3(_.slice(binary, i, i + 3)))
 	}
 	arr = _.map(arr, function(i) {
-		return encoding.encodeMap[i] || padChar
+		return encoding.encodeMap[i] || encoding.padding
 	})
 	return arr.join('')
 }
@@ -95,12 +94,13 @@ function arr3to4(arr) {
 	return ret
 }
 
-function getEncodingMap(str) {
+function getEncodingMap(str, padding) {
 	var encodeMap = str2obj(str)
 	var decodeMap = _.invert(encodeMap)
 	return {
 		encodeMap: encodeMap,
-		decodeMap: decodeMap
+		decodeMap: decodeMap,
+		padding: padding
 	}
 }
 

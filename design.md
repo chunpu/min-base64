@@ -59,3 +59,17 @@ base64 按6位分，而 byte 是8位二进制，最小公倍数是24
 1. 001001 = 0110**0010**, **01**100011，`((98 & 0x0f) << 2) | (99 >> 6) = 9`
 1. 100011 = 01**100011**，`99 & 0x3f = 35`
 
+
+url safe base64
+
+https://docs.python.org/3/library/base64.html#base64.urlsafe%5Fb64encode
+
+Encode bytes-like object s using the URL- and filesystem-safe alphabet, which substitutes - instead of + and _ instead of / in the standard Base64 alphabet, and return the encoded bytes. The result can still contain =
+
+https://en.wikipedia.org/wiki/Base64#URL_applications
+
+`+` 始终代替 `-`
+
+没有 = 这个 paddding
+
+是否要忽略非 ascii 字符 作为参数

@@ -23,6 +23,10 @@ describe('btoa encode', function() {
 		// echo -n 中文12 | base64
 		assert.deepEqual(base64.btoa('中文12'), '5Lit5paHMTI=')
 	})
+
+	it('encode in url mode has no =', function() {
+		assert.deepEqual(base64.btoa('a', {useURL: true}), 'YQ')
+	})
 })
 
 describe('atob decode', function() {
@@ -50,7 +54,7 @@ describe('other', function() {
 		assert.deepEqual(retURLTxt, txt)
 	})
 
-	it('support skip empty line \\n \\r', function() {
+	it('support skip empty line \\n \\r, support base64 --wrap', function() {
 		assert.deepEqual(base64.atob('5Lit\n5p\n\raH\rMTI='), '中文12')
 	})
 })
