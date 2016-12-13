@@ -2,11 +2,11 @@ var assert = require('assert')
 var base64 = require('./')
 
 describe('btoa encode', function() {
-	it('encode empty', function() {
+	it('encode empty text', function() {
 		assert.deepEqual(base64.btoa(''), '')
 	})
 
-	it('encode simple string', function() {
+	it('encode text', function() {
 		// echo -n a | base64
 		assert.deepEqual(base64.btoa('a'), 'YQ==')
 
@@ -14,27 +14,23 @@ describe('btoa encode', function() {
 		assert.deepEqual(base64.btoa('abc'), 'YWJj')
 	})
 
-	it('encode binary array', function() {
+	it('encode bytes', function() {
 		// abc => [97, 98, 99]
-		assert.deepEqual(base64.btoa([97, 98, 99]), 'YWJj')
+		assert.deepEqual(base64.encodeBytes([97, 98, 99]), 'YWJj')
 	})
 
-	it('encode other unicode', function() {
+	it('encode other unicode text', function() {
 		// echo -n 中文12 | base64
 		assert.deepEqual(base64.btoa('中文12'), '5Lit5paHMTI=')
-	})
-
-	it('encode in url mode has no =', function() {
-		assert.deepEqual(base64.btoa('a', {useURL: true}), 'YQ')
 	})
 })
 
 describe('atob decode', function() {
-	it('decode other unicode', function() {
+	it('decode other unicode text', function() {
 		assert.deepEqual(base64.atob('5Lit5paHMTI='), '中文12')
 	})
 
-	it('decode other unicode', function() {
+	it('decode other unicode text', function() {
 		assert.deepEqual(base64.atob('5Lit5paHMTI==== '), '中文12')
 	})
 })
@@ -54,7 +50,7 @@ describe('other', function() {
 		assert.deepEqual(retURLTxt, txt)
 	})
 
-	it('support skip empty line \\n \\r, support base64 --wrap', function() {
+	it('support skip empty line \\n \\r', function() {
 		assert.deepEqual(base64.atob('5Lit\n5p\n\raH\rMTI='), '中文12')
 	})
 })

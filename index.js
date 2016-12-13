@@ -3,13 +3,21 @@ var byteCode = require('bytecode')
 
 var is = _.is
 
-exports.encode = exports.btoa = encode
-exports.decode = exports.atob = decode
+exports.encode = exports.btoa = encodeText
+exports.decode = exports.atob = decodeToText
+exports.encodeBytes = encodeBytes
+exports.decodeToBytes = decodeToBytes
 
-var StdEncoding = getEncodingMap('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/', '=')
-var URLEncoding = getEncodingMap('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_', '')
+var padChar = '='
+var StdEncoding = getEncodingMap('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/')
+var URLEncoding = getEncodingMap('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_')
 
-function decode(text, opt) {
+function decodeToText(text, opt) {
+	var bytes = decodeToBytes(text, opt)
+	return byteCode.encode(bytes)
+}
+
+function decodeToBytes(text, opt) {
 	opt = opt || {}
 	var encoding = StdEncoding
 	if (opt.useURL) {
@@ -29,28 +37,26 @@ function decode(text, opt) {
 		var bytes = arr3to4(_.slice(buf, i, i + 4))
 		arr.push.apply(arr, bytes)
 	}
-	return byteCode.encode(arr)
+	return arr
 }
 
-function encode(binary, opt) {
-	if (is.string(binary)) {
-		binary = byteCode.decode(binary)
-	}
-	return encodeBinary(binary, opt)
+function encodeText(text, opt) {
+	var bytes = byteCode.decode(text)
+	return encodeBytes(bytes, opt)
 }
 
-function encodeBinary(binary, opt) {
+function encodeBytes(bytes, opt) {
 	opt = opt || {}
 	var encoding = StdEncoding
 	if (opt.useURL) {
 		encoding = URLEncoding
 	}
 	var arr = []
-	for (var i = 0; i < binary.length; i += 3) {
-		arr.push.apply(arr, arr4to3(_.slice(binary, i, i + 3)))
+	for (var i = 0; i < bytes.length; i += 3) {
+		arr.push.apply(arr, arr4to3(_.slice(bytes, i, i + 3)))
 	}
 	arr = _.map(arr, function(i) {
-		return encoding.encodeMap[i] || encoding.padding
+		return encoding.encodeMap[i] || padChar
 	})
 	return arr.join('')
 }
@@ -94,13 +100,12 @@ function arr3to4(arr) {
 	return ret
 }
 
-function getEncodingMap(str, padding) {
+function getEncodingMap(str) {
 	var encodeMap = str2obj(str)
 	var decodeMap = _.invert(encodeMap)
 	return {
 		encodeMap: encodeMap,
-		decodeMap: decodeMap,
-		padding: padding
+		decodeMap: decodeMap
 	}
 }
 
