@@ -4,6 +4,7 @@ min-base64
 [![NPM version][npm-image]][npm-url]
 [![Downloads][downloads-image]][downloads-url]
 [![Dependency Status][david-image]][david-url]
+
 [npm-image]: https://img.shields.io/npm/v/min-base64.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/min-base64
 [downloads-image]: http://img.shields.io/npm/dm/min-base64.svg?style=flat-square
